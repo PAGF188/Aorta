@@ -37,9 +37,8 @@ def step1(img):
 def step2(img):
     """
     Paso 2 del preprocesamiento. Truncamiento basado en intensidad:
-    Eliminar:
-        - Líneas blancas
-        - Intensidades inferiores 
+    - Eliminar líneas blancas
+    - Binarizar la imagen en zona de interés.
     
     Parameters
     ----------
@@ -49,32 +48,31 @@ def step2(img):
     -------
     image : numpy.ndarray | imagen GRAY 
     """
-    UMBRAL_O = 25   # 40********!!!
-    UMBRAL_C = 225  # Eliminar líneas blancas
-    ix,iy = np.where(img<=UMBRAL_O)
-    img[ix,iy]=0
 
+    UMBRAL_O = 25   # Binarización
+    UMBRAL_C = 225  # Eliminar líneas blancas
+
+    # Thresholding
     ix,iy = np.where(img>=UMBRAL_C)
     img[ix,iy]=0
 
-    ix,iy = np.where(img>UMBRAL_O)
-    img[ix,iy]=255
+    ix,iy = np.where(img<=UMBRAL_O)
+    img[ix,iy]=0
 
-    #mejor
+    ix,iy = np.where(img>UMBRAL_O)
+    img[ix,iy]=1  # 255
+
+    # Depuración resultados
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
     img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel,iterations=2)
 
     kernel2 = np.zeros((5,3))
-    kernel2[0,1] = 1
-    kernel2[1,1] = 1
-    kernel2[2,1] = 1
-    kernel2[3,1] = 1
-    kernel2[4,1] = 1
+    kernel2[:,1] = 1
     img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel2.astype(np.uint8),iterations=1)
 
     return img
 
-def step3(img):
+def step3(img):  # MSER -> descartado
     MIN_A = 1
     MAX_A = 10
     DELTA_ = 10

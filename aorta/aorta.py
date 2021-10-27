@@ -5,6 +5,7 @@ import argparse
 import time
 import json
 from preprocessing import *
+from processing import *
 import pdb
 
 ### Globales ------------------------------------------------
@@ -52,10 +53,11 @@ for nombre_img in nombre_imagenes:
     inicio = time.perf_counter() 
 
     # ETAPA 1 -------------------------------------------------------
-    resultado = preprocesar(imagen)
+    img_preprocesada = preprocesar(imagen)
 
     # ETAPA 2 -------------------------------------------------------
-    
+    walls = paredes(img_preprocesada)
+
     #resultado = cv2.GaussianBlur(resultado, (5,5), 0)
     #resultado = cv2.Canny(resultado,100,200)  # 5 30 
     
