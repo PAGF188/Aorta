@@ -55,6 +55,7 @@ for nombre_img in nombre_imagenes:
     resultado = preprocesar(imagen)
 
     # ETAPA 2 -------------------------------------------------------
+    
     #resultado = cv2.GaussianBlur(resultado, (5,5), 0)
     #resultado = cv2.Canny(resultado,100,200)  # 5 30 
     

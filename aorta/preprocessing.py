@@ -6,8 +6,11 @@ from matplotlib import pyplot as plt
 
 def step1(img):
     """
-    Paso 1 del preprocesamiento de la imagen:
-    Eliminar todo lo que no sea el círculo central
+    Paso 1 del preprocesamiento. Truncamiento basado en posición:
+    Eliminar:
+        - Subimagen inferior
+        - Exterior 1º círculo
+        - Círculo interno
     
     Parameters
     ----------
@@ -17,9 +20,9 @@ def step1(img):
     -------
     image : numpy.ndarray | imagen GRAY 
     """
-    TRUNCAMIENTO_ = 528
-    RADIO1_ = 262
-    RADIO2_ = 55
+    TRUNCAMIENTO_ = 528  # Eliminar subimagen inferior
+    RADIO1_ = 262        # Eliminar exterior 1º círculo
+    RADIO2_ = 55         # Eliminar círculo interno
 
     img = img[0:TRUNCAMIENTO_,:]
     sy,sx = img.shape
@@ -33,10 +36,10 @@ def step1(img):
 
 def step2(img):
     """
-    Paso 2 del preprocesamiento de la imagen:
-    Dentro del círculo central: 
-    - Eliminar subcírculo interno
-    - Eliminar líneas blancas
+    Paso 2 del preprocesamiento. Truncamiento basado en intensidad:
+    Eliminar:
+        - Líneas blancas
+        - Intensidades inferiores 
     
     Parameters
     ----------
@@ -46,15 +49,46 @@ def step2(img):
     -------
     image : numpy.ndarray | imagen GRAY 
     """
-    UMBRAL_O = 40
-    UMBRAL_C = 225
+    UMBRAL_O = 25   # 40********!!!
+    UMBRAL_C = 225  # Eliminar líneas blancas
     ix,iy = np.where(img<=UMBRAL_O)
     img[ix,iy]=0
 
     ix,iy = np.where(img>=UMBRAL_C)
     img[ix,iy]=0
 
+    ix,iy = np.where(img>UMBRAL_O)
+    img[ix,iy]=255
+
+    #mejor
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
+    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel,iterations=2)
+
+    kernel2 = np.zeros((5,3))
+    kernel2[0,1] = 1
+    kernel2[1,1] = 1
+    kernel2[2,1] = 1
+    kernel2[3,1] = 1
+    kernel2[4,1] = 1
+    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel2.astype(np.uint8),iterations=1)
+
     return img
+
+def step3(img):
+    MIN_A = 1
+    MAX_A = 10
+    DELTA_ = 10
+    aux = img*1
+    rows,cols = img.shape
+    blurred = cv2.blur(img,(5,5))
+    min=int(MIN_A/100*rows*cols)
+    max=int(MAX_A/100*rows*cols)
+    mser = cv2.MSER_create(DELTA_,min,max,0.8)
+    regions, bboxes = mser.detectRegions(blurred)   
+    for r in regions:
+        i,j=np.transpose(np.fliplr(r))
+        aux[i,j]=(255)
+    return aux
 
 def preprocesar(image):
     return step2(step1(image))
