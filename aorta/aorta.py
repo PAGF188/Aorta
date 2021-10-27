@@ -66,7 +66,7 @@ for nombre_img in nombre_imagenes:
 
     # ALMACENAR RESULTADOS
     imagenes.append(imagen)
-    resultados.append(resultado)
+    resultados.append(walls)
 
     print("%s |%s%s| %d/%d [%d%%] in %.2fs (eta: %.2fs)"  % ("Processing...",u"\u2588" * i," " * (len(imagenes)-i),i,len(imagenes),int(i/len(imagenes)*100),tiempo,(fin-inicio)*(len(imagenes)-i)),end='\r', flush=True)
     i+=1
