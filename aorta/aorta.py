@@ -52,27 +52,29 @@ for nombre_img in nombre_imagenes:
     imagen = cv2.imread(nombre_img,cv2.IMREAD_GRAYSCALE)
     inicio = time.perf_counter() 
 
-    # ETAPA 1 -------------------------------------------------------
+    # ETAPA 1: Preprocesar ------------------------------------------
     img_preprocesada = preprocesar(imagen)
 
-    # ETAPA 2 -------------------------------------------------------
+    # ETAPA 2: Limitación aorta + params ----------------------------
     pared, borde_pared = paredes(img_preprocesada)
     aortic_params = get_aortic_params(pared, borde_pared)
-    
+
+    # ETAPA 3: Stents -----------------------------------------------
+    r = stents(img_preprocesada, aortic_params[1], aortic_params[2])
+
     fin = time.perf_counter()
     tiempo += (fin-inicio)
 
 
     # ALMACENAR RESULTADOS
     imagenes.append(imagen)
-    resultados.append(borde_pared)
+    resultados.append(r*255)
 
     print("%s |%s%s| %d/%d [%d%%] in %.2fs (eta: %.2fs)"  % ("Processing...",u"\u2588" * i," " * (len(imagenes)-i),i,len(imagenes),int(i/len(imagenes)*100),tiempo,(fin-inicio)*(len(imagenes)-i)),end='\r', flush=True)
     i+=1
 
 
 # SALVAR RESULTADOS
-
 ###### Versión rápida
 i=1
 for nombre, img, resultado in zip(nombre_imagenes, imagenes, resultados):

@@ -3,6 +3,7 @@ import cv2
 import pdb
 from matplotlib import pyplot as plt
 from skimage.morphology import flood
+from skimage.morphology import remove_small_holes
 
 def paredes(img):
     """
@@ -28,7 +29,8 @@ def paredes(img):
     paredes[ix,iy]=0
 
     # Obtenemos su borde
-    borde = cv2.Canny(paredes,1,20)
+    borde = cv2.Canny(paredes,1000,1400)
+
     return paredes, borde
 
 def get_aortic_params(pared, borde_pared):
@@ -70,3 +72,19 @@ def get_aortic_params(pared, borde_pared):
     circularidad = (radio - diferencia_m)/radio
     
     return area,centro,radio,circularidad
+
+def stents(img_preprocesada, centro, radio):
+    RAD_ = 55
+    aa = cv2.circle(img_preprocesada,centro[::-1],int(radio+RAD_),1,thickness=6)
+    
+    arr = aa > 0
+    aa = remove_small_holes(arr, 100).astype(np.uint8)
+    
+    RAD_ = 35
+    aa = cv2.circle(aa,centro[::-1],int(radio+RAD_),1,thickness=1)
+
+    
+    mascara = img_preprocesada * 0
+    mascara = cv2.circle(mascara,centro[::-1],int(radio+RAD_),1,cv2.FILLED)
+
+    return aa * mascara
