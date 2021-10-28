@@ -42,7 +42,11 @@ def get_aortic_params(pared, borde_pared):
     Returns
     -------
     area: int | nº de píxeles que forman la aorta.
+    centro: numpy.ndarray (2,) | int(media) de todos los puntos que integran la aorta.
+    radio: float | media distancias de cada punto de borde al centro.
+    circularidad: float [0-1] | media diferencias radio "real" radio "esperado" relativizado. 
     """
+
     indices_ = np.where(pared==255) # indices píxeles aorta
     indices_borde = np.where(borde_pared==255) # indice píxeles borde aorta
 
@@ -51,7 +55,7 @@ def get_aortic_params(pared, borde_pared):
 
     # CENTRO ----> media de todos los puntos que integran la aorta (blancos)
     centro = (np.sum(indices_,axis=1) / area).astype(int)
-    
+
     # RADIO -----> para mejor estimación usamos la distancia media de cada punto de borde al centro
     puntos_borde = np.array(indices_borde).T
     distancias_centro_borde = [np.linalg.norm(centro - aux) for aux in puntos_borde]
