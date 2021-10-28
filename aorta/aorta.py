@@ -56,17 +56,16 @@ for nombre_img in nombre_imagenes:
     img_preprocesada = preprocesar(imagen)
 
     # ETAPA 2 -------------------------------------------------------
-    walls = paredes(img_preprocesada)
-
-    #resultado = cv2.GaussianBlur(resultado, (5,5), 0)
-    #resultado = cv2.Canny(resultado,100,200)  # 5 30 
+    pared, borde_pared = paredes(img_preprocesada)
+    aortic_params = get_aortic_params(pared, borde_pared)
     
     fin = time.perf_counter()
     tiempo += (fin-inicio)
 
+
     # ALMACENAR RESULTADOS
     imagenes.append(imagen)
-    resultados.append(walls)
+    resultados.append(borde_pared)
 
     print("%s |%s%s| %d/%d [%d%%] in %.2fs (eta: %.2fs)"  % ("Processing...",u"\u2588" * i," " * (len(imagenes)-i),i,len(imagenes),int(i/len(imagenes)*100),tiempo,(fin-inicio)*(len(imagenes)-i)),end='\r', flush=True)
     i+=1

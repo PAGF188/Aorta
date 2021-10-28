@@ -14,11 +14,11 @@ def step1(img):
     
     Parameters
     ----------
-    image : numpy.ndarray | imagen GRAY 
+    img : numpy.ndarray | imagen GRAY 
     
     Returns
     -------
-    image : numpy.ndarray | imagen GRAY 
+    img : numpy.ndarray | imagen GRAY 
     """
     TRUNCAMIENTO_ = 528  # Eliminar subimagen inferior
     RADIO1_ = 262        # Eliminar exterior 1º círculo
@@ -42,11 +42,11 @@ def step2(img):
     
     Parameters
     ----------
-    image : numpy.ndarray | imagen GRAY 
+    img : numpy.ndarray | imagen GRAY 
     
     Returns
     -------
-    image : numpy.ndarray | imagen GRAY 
+    img : numpy.ndarray | imagen GRAY 
     """
 
     UMBRAL_O = 25   # Binarización
