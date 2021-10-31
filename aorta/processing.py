@@ -3,7 +3,7 @@ import cv2
 import pdb
 from matplotlib import pyplot as plt
 from skimage.morphology import flood
-from skimage.morphology import remove_small_holes
+from skimage.morphology import thin
 
 def paredes(img):
     """
@@ -73,18 +73,47 @@ def get_aortic_params(pared, borde_pared):
     
     return area,centro,radio,circularidad
 
-def stents(img_preprocesada, centro, radio):
-    RAD_ = 55
-    aa = cv2.circle(img_preprocesada,centro[::-1],int(radio+RAD_),1,thickness=6)
-    
-    arr = aa > 0
-    aa = remove_small_holes(arr, 100).astype(np.uint8)
-    
-    RAD_ = 35
-    aa = cv2.circle(aa,centro[::-1],int(radio+RAD_),1,thickness=1)
-
-    
+def stents(img_preprocesada, centro, radio, borde_pared):
+    RAD_MAX = 50  # VALOR A AJUSTAR
+    # Nos quedamos solo con radio + RAD_MAX
     mascara = img_preprocesada * 0
-    mascara = cv2.circle(mascara,centro[::-1],int(radio+RAD_),1,cv2.FILLED)
+    mascara = cv2.circle(mascara,centro[::-1],int(radio + RAD_MAX),1,cv2.FILLED)
+    aux = img_preprocesada * mascara
 
-    return aa * mascara
+    # Círculo exterior
+    aux = cv2.circle(aux,centro[::-1],int(radio+RAD_MAX),1,thickness=3)
+    
+    # "Círculo" (no es un circulo) interior
+    c1 = cv2.resize(borde_pared, (0,0), fx=1.23, fy=1.23)
+    ii,jj = np.where(c1>0) 
+    c1[ii,jj] = 1
+    diferencia = np.array(c1.shape) - np.array(img_preprocesada.shape)
+    c1 = c1[diferencia[0]//2 : -diferencia[0]//2,diferencia[1]//2 : -diferencia[1]//2]
+    c1 = thin(c1)
+    
+    # borrar -> para pintar ambos
+    # ii,jj = np.where(c1>0) 
+    # aux[ii,jj] = 0
+
+
+    # Buscamos corte entre ambos
+    c1 = 1-c1
+    cortes = np.logical_or(aux,c1)
+    ii,jj = np.where(cortes==0)
+
+    n_region = 2
+    for corte in zip(ii,jj):
+        if aux[corte] == 0:
+            region = flood(aux, corte)
+            # Si la región no supera el limite
+            if np.count_nonzero(region)<3000:
+                aux[region] = n_region
+                n_region+=1
+    
+    print("Numero de regiones:", n_region-2)
+    plt.imshow(aux)
+    plt.show()
+   
+    
+    
+    return aux

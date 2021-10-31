@@ -42,11 +42,11 @@ def step2(img):
     
     Parameters
     ----------
-    img : numpy.ndarray | imagen GRAY 
+    img : numpy.ndarray | imagen binaria | 0-1
     
     Returns
     -------
-    img : numpy.ndarray | imagen GRAY 
+    img : numpy.ndarray | imagen binaria | 0-1
     """
 
     UMBRAL_O = 25   # Binarización

@@ -11,6 +11,7 @@ import pdb
 ### Globales ------------------------------------------------
 nombre_imagenes = []  # nombre imágenes
 imagenes = []         # imágenes np.array
+preprocesadas = []    # imagenes preprocesadas
 resultados = []       # imagenes procesadas
 tiempo = 0
 ### ---------------------------------------------------------
@@ -49,6 +50,7 @@ print("%s |%s%s| %d/%d [%d%%] in %.2fs"  % ("Processing...","-" * 0," " * (len(n
 
 i=1
 for nombre_img in nombre_imagenes:
+    print(nombre_img)
     imagen = cv2.imread(nombre_img,cv2.IMREAD_GRAYSCALE)
     inicio = time.perf_counter() 
 
@@ -58,9 +60,10 @@ for nombre_img in nombre_imagenes:
     # ETAPA 2: Limitación aorta + params ----------------------------
     pared, borde_pared = paredes(img_preprocesada)
     aortic_params = get_aortic_params(pared, borde_pared)
+    print(aortic_params)
 
     # ETAPA 3: Stents -----------------------------------------------
-    r = stents(img_preprocesada, aortic_params[1], aortic_params[2])
+    r = stents(img_preprocesada, aortic_params[1], aortic_params[2], borde_pared)
 
     fin = time.perf_counter()
     tiempo += (fin-inicio)
@@ -68,15 +71,16 @@ for nombre_img in nombre_imagenes:
 
     # ALMACENAR RESULTADOS
     imagenes.append(imagen)
-    resultados.append(r*255)
+    preprocesadas.append(img_preprocesada*255)
+    resultados.append(r)
 
-    print("%s |%s%s| %d/%d [%d%%] in %.2fs (eta: %.2fs)"  % ("Processing...",u"\u2588" * i," " * (len(imagenes)-i),i,len(imagenes),int(i/len(imagenes)*100),tiempo,(fin-inicio)*(len(imagenes)-i)),end='\r', flush=True)
+    #print("%s |%s%s| %d/%d [%d%%] in %.2fs (eta: %.2fs)"  % ("Processing...",u"\u2588" * i," " * (len(imagenes)-i),i,len(imagenes),int(i/len(imagenes)*100),tiempo,(fin-inicio)*(len(imagenes)-i)),end='\r', flush=True)
     i+=1
 
 
 # SALVAR RESULTADOS
 ###### Versión rápida
 i=1
-for nombre, img, resultado in zip(nombre_imagenes, imagenes, resultados):
+for nombre, img, prepo, resultado in zip(nombre_imagenes, imagenes, preprocesadas, resultados):
     cv2.imwrite(os.path.join(output_directory,os.path.basename(nombre)+".png"), resultado) 
     i+=1
