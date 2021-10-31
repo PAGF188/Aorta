@@ -12,12 +12,12 @@ def paredes(img):
     
     Parameters
     ----------
-    img : numpy.ndarray | imagen GRAY 
+    img : numpy.ndarray | imagen binaria | 0-1 | ROI
     
     Returns
     -------
-    paredes : numpy.ndarray | mascara binaria 0 o 255
-    borde :   numpy.ndarray | mascara binaria 0 o 255
+    paredes : numpy.ndarray | imagen binaria 0 o 255
+    borde :   numpy.ndarray | imagen binaria 0 o 255
     """
 
     # Localizamos la componente conexa del píxel central (pixel interior aorta).
@@ -35,7 +35,6 @@ def paredes(img):
 
 def get_aortic_params(pared, borde_pared):
     """
-    
     Parameters
     ----------
     pared : numpy.ndarray | mascara binaria 0 o 255 | localización interior aorta.
@@ -74,46 +73,70 @@ def get_aortic_params(pared, borde_pared):
     return area,centro,radio,circularidad
 
 def stents(img_preprocesada, centro, radio, borde_pared):
-    RAD_MAX = 50  # VALOR A AJUSTAR
-    # Nos quedamos solo con radio + RAD_MAX
+    """
+    
+    Parameters
+    ----------
+    img_preprocesada : numpy.ndarray | imagen binaria | 0-1 | ROI
+    centro: numpy.ndarray (2,) | int(media) de todos los puntos que integran la aorta.
+    radio: float | media distancias de cada punto de borde al centro.
+    borde_pared : numpy.ndarray | mascara binaria 0 o 255 | localización solo paredes.
+
+    Returns
+    -------
+    aux : numpy.ndarray | matriz con n regiones de sombra stent etiquetas (2-)
+    tams :  lista | tamaño n (nº regiones stent) | elemento i, tam stent i.
+    """
+
+    RAD_MAX = 50
+    tams = []
+
+    # LIMITE ROI -------------------------------------------------------------
+    # De img_preprocesada, nos quedamos con |puntos| < radio + RAD_MAX.
+    # Y añadimos círculo exterior
     mascara = img_preprocesada * 0
     mascara = cv2.circle(mascara,centro[::-1],int(radio + RAD_MAX),1,cv2.FILLED)
     aux = img_preprocesada * mascara
-
     # Círculo exterior
     aux = cv2.circle(aux,centro[::-1],int(radio+RAD_MAX),1,thickness=3)
     
-    # "Círculo" (no es un circulo) interior
-    c1 = cv2.resize(borde_pared, (0,0), fx=1.23, fy=1.23)
-    ii,jj = np.where(c1>0) 
-    c1[ii,jj] = 1
+    # IDENTIFICACIÓN STENTS ---------------------------------------------------
+    # Se basa en proyectar el borde de la pared de la aorta sobre el exterior y buscar
+    # los puntos de corte con zonas oscuras (las sombras generadas por los stents).
+    # A continuación se calcula la región de puntos conexos respecto al punto de corte
+    # Esta región se usa para estimar el tamaño del stent
+
+
+    c1 = cv2.resize(borde_pared, (0,0), fx=1.25, fy=1.25)
+    ii,jj = np.where(c1>0) # la interpolación genera valores intermedios
+    c1[ii,jj] = 1      
     diferencia = np.array(c1.shape) - np.array(img_preprocesada.shape)
-    c1 = c1[diferencia[0]//2 : -diferencia[0]//2,diferencia[1]//2 : -diferencia[1]//2]
+    c1 = c1[diferencia[0]//2 : -diferencia[0]//2,diferencia[1]//2 : -diferencia[1]//2] # truncamos 
     c1 = thin(c1)
     
-    # borrar -> para pintar ambos
+    # pintar resultado de la proyección ||| borrar
     # ii,jj = np.where(c1>0) 
     # aux[ii,jj] = 0
 
-
-    # Buscamos corte entre ambos
+    # Buscamos corte entre proyección y sombras de stents
     c1 = 1-c1
     cortes = np.logical_or(aux,c1)
-    ii,jj = np.where(cortes==0)
+    ii,jj = np.where(cortes==0)   # ii,jj -> píxeles de corte
 
     n_region = 2
+    # Recorremos los píxeles de corte identificando la región completa si no está ya etiquetada.
+    # Dos umbrales para eliminar FP -> área mínima | área máxima 
     for corte in zip(ii,jj):
         if aux[corte] == 0:
             region = flood(aux, corte)
-            # Si la región no supera el limite
-            if np.count_nonzero(region)<3000:
+            size_r = np.count_nonzero(region)
+            if size_r<3000 and size_r>1:
                 aux[region] = n_region
+                tams.append(size_r)
                 n_region+=1
     
     print("Numero de regiones:", n_region-2)
     plt.imshow(aux)
     plt.show()
-   
-    
     
     return aux

@@ -42,7 +42,7 @@ def step2(img):
     
     Parameters
     ----------
-    img : numpy.ndarray | imagen binaria | 0-1
+    img : numpy.ndarray | imagen GRAY
     
     Returns
     -------
@@ -89,4 +89,15 @@ def step3(img):  # MSER -> descartado
     return aux
 
 def preprocesar(image):
+    """
+    Preprocesamiento de la imagen.
+    
+    Parameters
+    ----------
+    img : numpy.ndarray | imagen GRAY
+    
+    Returns
+    -------
+    img : numpy.ndarray | imagen binaria | 0-1 | ROI
+    """
     return step2(step1(image))
