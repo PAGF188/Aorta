@@ -88,7 +88,7 @@ def stents(img_preprocesada, centro, radio, borde_pared):
     tams :  lista | tamaño n (nº regiones stent) | elemento i, tam stent i.
     """
 
-    RAD_MAX = 50
+    RAD_MAX = 40
     tams = []
 
     # LIMITE ROI -------------------------------------------------------------
@@ -100,6 +100,10 @@ def stents(img_preprocesada, centro, radio, borde_pared):
     # Círculo exterior
     aux = cv2.circle(aux,centro[::-1],int(radio+RAD_MAX),1,thickness=3)
     
+    # Eliminación "narrows"
+    aux = cv2.morphologyEx(aux, cv2.MORPH_CLOSE, np.ones((3,3)),iterations=1)
+
+
     # IDENTIFICACIÓN STENTS ---------------------------------------------------
     # Se basa en proyectar el borde de la pared de la aorta sobre el exterior y buscar
     # los puntos de corte con zonas oscuras (las sombras generadas por los stents).
@@ -114,7 +118,7 @@ def stents(img_preprocesada, centro, radio, borde_pared):
     c1 = c1[diferencia[0]//2 : -diferencia[0]//2,diferencia[1]//2 : -diferencia[1]//2] # truncamos 
     c1 = thin(c1)
     
-    # pintar resultado de la proyección ||| borrar
+    # # pintar resultado de la proyección ||| borrar
     # ii,jj = np.where(c1>0) 
     # aux[ii,jj] = 0
 
@@ -130,13 +134,26 @@ def stents(img_preprocesada, centro, radio, borde_pared):
         if aux[corte] == 0:
             region = flood(aux, corte)
             size_r = np.count_nonzero(region)
-            if size_r<3000 and size_r>1:
+            if size_r<3000 and size_r>20:
                 aux[region] = n_region
                 tams.append(size_r)
                 n_region+=1
     
-    print("Numero de regiones:", n_region-2)
-    plt.imshow(aux)
-    plt.show()
+    # print("Numero de regiones:", n_region-2)
+    # plt.imshow(cortes)
+    # plt.show()
     
-    return aux
+    return aux,tams
+
+def clasifica(tams):
+    LIMITE_M = 400
+    string = ""
+    i=0
+    for tam in tams:
+        string += "Stent " + str(i) + ": "
+        if tam > LIMITE_M:
+            string += "grande\n"
+        else:
+            string += "pequeño\n"
+        i+=1
+    return string
