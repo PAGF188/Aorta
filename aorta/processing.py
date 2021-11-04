@@ -148,7 +148,7 @@ def stents(img_preprocesada, centro, radio, borde_pared):
 def clasifica(tams):
     LIMITE_M = 400
     string = ""
-    i=0
+    i=2
     for tam in tams:
         string += "Stent " + str(i) + ": "
         if tam > LIMITE_M:

@@ -100,3 +100,5 @@ for nombre, img, prepo, resultado, clasi in zip(nombre_imagenes, imagenes, prepr
         plt.text(jj[0],ii[0],str(i))
     plt.savefig(os.path.join(output_directory,os.path.basename(nombre))+".png")
     plt.clf()
+    print(nombre)
+    print(clasi)
