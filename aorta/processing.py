@@ -88,7 +88,7 @@ def stents(img_preprocesada, centro, radio, borde_pared):
     tams :  lista | tamaño n (nº regiones stent) | elemento i, tam stent i.
     """
 
-    RAD_MAX = 40
+    RAD_MAX = 43
     tams = []
 
     # LIMITE ROI -------------------------------------------------------------
@@ -98,7 +98,7 @@ def stents(img_preprocesada, centro, radio, borde_pared):
     mascara = cv2.circle(mascara,centro[::-1],int(radio + RAD_MAX),1,cv2.FILLED)
     aux = img_preprocesada * mascara
     # Círculo exterior
-    aux = cv2.circle(aux,centro[::-1],int(radio+RAD_MAX),1,thickness=3)
+    aux = cv2.circle(aux,centro[::-1],int(radio+RAD_MAX),1,thickness=2)
     
     # Eliminación "narrows"
     aux = cv2.morphologyEx(aux, cv2.MORPH_CLOSE, np.ones((3,3)),iterations=1)
@@ -134,7 +134,7 @@ def stents(img_preprocesada, centro, radio, borde_pared):
         if aux[corte] == 0:
             region = flood(aux, corte)
             size_r = np.count_nonzero(region)
-            if size_r<3000 and size_r>20:
+            if size_r<3000 and size_r>55:
                 aux[region] = n_region
                 tams.append(size_r)
                 n_region+=1

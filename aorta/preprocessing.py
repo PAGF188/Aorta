@@ -48,7 +48,6 @@ def step2(img):
     -------
     img : numpy.ndarray | imagen binaria | 0-1
     """
-
     UMBRAL_O = 25   # Binarización
     UMBRAL_C = 225  # Eliminar líneas blancas
 
