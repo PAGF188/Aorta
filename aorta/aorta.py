@@ -107,8 +107,13 @@ print("│                   RESULTADOS                      │\n")
 print("└───────────────────────────────────────────────────┘\n\n")
 
 i=1
+f, ax = plt.subplots(1,2)
 for nombre, img, prepo, resultado, clasi, aort in zip(nombre_imagenes, imagenes, preprocesadas, resultados,clasificaciones,aortic_p_vector):
-    plt.imshow(resultado)
+    f, ax = plt.subplots(1,2)
+    ax[0].imshow(img*255,cmap='gray')
+    ax[0].axis('off')
+    ax[1].imshow(resultado)
+    ax[1].axis('off')
     for i in range(2,np.max(resultado)+1):
         ii,jj = np.where(resultado==i)
         plt.text(jj[0],ii[0],str(i))
