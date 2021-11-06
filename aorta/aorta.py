@@ -14,6 +14,7 @@ imagenes = []         # imágenes np.array
 preprocesadas = []    # imagenes preprocesadas
 resultados = []       # imagenes procesadas
 clasificaciones = []
+aortic_p_vector = []
 tiempo = 0
 ### ---------------------------------------------------------
 
@@ -51,7 +52,7 @@ print("%s |%s%s| %d/%d [%d%%] in %.2fs"  % ("Processing...","-" * 0," " * (len(n
 
 i=1
 for nombre_img in nombre_imagenes:
-    print(nombre_img)
+    #print(nombre_img)
     imagen = cv2.imread(nombre_img,cv2.IMREAD_GRAYSCALE)
     inicio = time.perf_counter() 
 
@@ -67,7 +68,7 @@ for nombre_img in nombre_imagenes:
     r,tams = stents(img_preprocesada, aortic_params[1], aortic_params[2], borde_pared)
 
     # ETAPA 4: Clasificacion ----------------------------------------
-    clasificaciones.append(clasifica(tams))
+    clas = clasifica(tams)
 
     fin = time.perf_counter()
     tiempo += (fin-inicio)
@@ -77,23 +78,25 @@ for nombre_img in nombre_imagenes:
     imagenes.append(imagen)
     preprocesadas.append(img_preprocesada*255)
     resultados.append(r)
+    aortic_p_vector.append(aortic_params)
+    clasificaciones.append(clas)
 
-    #print("%s |%s%s| %d/%d [%d%%] in %.2fs (eta: %.2fs)"  % ("Processing...",u"\u2588" * i," " * (len(imagenes)-i),i,len(imagenes),int(i/len(imagenes)*100),tiempo,(fin-inicio)*(len(imagenes)-i)),end='\r', flush=True)
+    print("%s |%s%s| %d/%d [%d%%] in %.2fs (eta: %.2fs)"  % ("Processing...",u"\u2588" * i," " * (len(nombre_imagenes)-i),i,len(nombre_imagenes),int(i/len(nombre_imagenes)*100),tiempo,(fin-inicio)*(len(nombre_imagenes)-i)),end='\r', flush=True)
     i+=1
 
 
 # # SALVAR RESULTADOS
-# ###### Versión rápida
+# ##### Versión rápida
 # i=1
-# for nombre, img, prepo, resultado, clasi in zip(nombre_imagenes, imagenes, preprocesadas, resultados,clasificaciones):
+# for nombre, prepo in zip(nombre_imagenes, preprocesadas):
 #     print(nombre)
-#     print(clasi)
-#     cv2.imwrite(os.path.join(output_directory,os.path.basename(nombre)+".png"), resultado) 
+#     cv2.imwrite(os.path.join(output_directory,os.path.basename(nombre)+".png"), prepo) 
 #     i+=1
+# exit()
 
 #### Versión lenta
 i=1
-for nombre, img, prepo, resultado, clasi in zip(nombre_imagenes, imagenes, preprocesadas, resultados,clasificaciones):
+for nombre, img, prepo, resultado, clasi, aort in zip(nombre_imagenes, imagenes, preprocesadas, resultados,clasificaciones,aortic_p_vector):
     plt.imshow(resultado)
     for i in range(2,np.max(resultado)+1):
         ii,jj = np.where(resultado==i)
@@ -101,4 +104,6 @@ for nombre, img, prepo, resultado, clasi in zip(nombre_imagenes, imagenes, prepr
     plt.savefig(os.path.join(output_directory,os.path.basename(nombre))+".png")
     plt.clf()
     print(nombre)
+    print(aort)
     print(clasi)
+    
