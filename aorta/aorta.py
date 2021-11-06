@@ -95,6 +95,17 @@ for nombre_img in nombre_imagenes:
 # exit()
 
 #### Versión lenta
+print("\n")
+
+print("#############################################################")
+print("#############################################################")
+print("#############################################################")
+print("#############################################################\n\n")
+
+print("┌───────────────────────────────────────────────────┐\n")
+print("│                   RESULTADOS                      │\n")
+print("└───────────────────────────────────────────────────┘\n\n")
+
 i=1
 for nombre, img, prepo, resultado, clasi, aort in zip(nombre_imagenes, imagenes, preprocesadas, resultados,clasificaciones,aortic_p_vector):
     plt.imshow(resultado)
@@ -103,7 +114,11 @@ for nombre, img, prepo, resultado, clasi, aort in zip(nombre_imagenes, imagenes,
         plt.text(jj[0],ii[0],str(i))
     plt.savefig(os.path.join(output_directory,os.path.basename(nombre))+".png")
     plt.clf()
-    print(nombre)
-    print(aort)
+    print("(-) Imagen: ", nombre)
+    print("\tarea:", aort[0])
+    print("\tcentro:", aort[1])
+    print("\tradio:", aort[2])
+    print("\tcircularidad:", aort[3],"\n")
+    print("\t ** STENTS **")
     print(clasi)
     

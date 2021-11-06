@@ -150,7 +150,7 @@ def clasifica(tams):
     string = ""
     i=2
     for tam in tams:
-        string += "Stent " + str(i) + ": "
+        string += "\tStent " + str(i) + ": "
         if tam > LIMITE_M:
             string += "grande\n"
         else:
