@@ -57,7 +57,7 @@ for nombre_img in nombre_imagenes:
     inicio = time.perf_counter() 
 
     # ETAPA 1: Preprocesar ------------------------------------------
-    img_preprocesada = preprocesar(imagen)
+    img_preprocesada = preprocesar(imagen*1)
 
     # ETAPA 2: Limitación aorta + params ----------------------------
     pared, borde_pared = paredes(img_preprocesada)
@@ -110,8 +110,9 @@ i=1
 f, ax = plt.subplots(1,2)
 for nombre, img, prepo, resultado, clasi, aort in zip(nombre_imagenes, imagenes, preprocesadas, resultados,clasificaciones,aortic_p_vector):
     f, ax = plt.subplots(1,2)
-    ax[0].imshow(img*255,cmap='gray')
+    ax[0].imshow(cv2.cvtColor(img, cv2.COLOR_GRAY2RGB))
     ax[0].axis('off')
+    ax[0].set_title(nombre)
     ax[1].imshow(resultado)
     ax[1].axis('off')
     for i in range(2,np.max(resultado)+1):
